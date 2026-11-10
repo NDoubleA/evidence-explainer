@@ -1,0 +1,358 @@
+{
+ "TITLE": "4624 · Network logon over NTLM",
+ "SOURCE": "Windows Security",
+ "EVENT_ID": "4624 type 3",
+ "SENSOR": "FS01 Security log (LSASS · Audit Logon)",
+ "BOUNDARY_SHORT": "network → FS01 (SMB 445)",
+ "EXAMPLE_BADGE": "<span class=\"chip\" style=\"color:#8b8b96;border-color:#3a3a44\">Example data: made-up hosts &amp; names</span>",
+ "TLDR": "[CONFIRMED] File server FS01 says: <b>the domain account CORP\\j.okafor logged on to me over the network</b> from 10.20.4.37 (calling itself WS-0147), using NTLM rather than Kerberos, at 14:32:07 UTC. [UNKNOWN] Who was behind it, how the password got there and what happened next all need other logs.",
+ "RAW_JSON": "2026-10-21T14:32:07.512Z  Computer=FS01.corp.example.local  Channel=Security  Provider=Microsoft-Windows-Security-Auditing  EventID=4624  SubjectUserSid=S-1-0-0  SubjectUserName=-  SubjectDomainName=-  SubjectLogonId=0x0  TargetUserSid=S-1-5-21-3623811015-3361044348-30300820-1107  TargetUserName=j.okafor  TargetDomainName=CORP  TargetLogonId=0x5A3F21C  LogonType=3  LogonProcessName=NtLmSsp  AuthenticationPackageName=NTLM  WorkstationName=WS-0147  LogonGuid={00000000-0000-0000-0000-000000000000}  TransmittedServices=-  LmPackageName=NTLM V2  KeyLength=128  ProcessId=0x0  ProcessName=-  IpAddress=10.20.4.37  IpPort=51544  ImpersonationLevel=%%1833  ElevatedToken=%%1843",
+ "CHALLENGE_JSON": [
+  {
+   "q": "What happened?",
+   "a": "<p>[CONFIRMED] A network logon (LogonType 3) to <code>FS01.corp.example.local</code> succeeded at 14:32:07 UTC using domain account <code>CORP\\j.okafor</code> (SID S-1-5-21-3623811015-3361044348-30300820-1107).</p><p>[CONFIRMED] Authentication was performed over NTLMv2 from source IP <code>10.20.4.37</code> (client-reported name <code>WS-0147</code>), establishing session ID <code>0x5A3F21C</code>.</p><p>[INFERRED] The connection was initiated remotely across the network boundary (e.g. SMB share access) rather than by an interactive user at the console.</p>"
+  },
+  {
+   "q": "What evidence supports that?",
+   "a": "<ul style=\"margin:6px 0;padding-left:18px\"><li>[CONFIRMED] <code>EventID=4624</code>: Successful logon event recorded on FS01.</li><li>[CONFIRMED] <code>LogonType=3</code>: Network logon session type.</li><li>[CONFIRMED] <code>TargetUserName=j.okafor</code> and <code>TargetDomainName=CORP</code>: Target identity verified by LSASS.</li><li>[CONFIRMED] <code>IpAddress=10.20.4.37</code> and <code>IpPort=51544</code>: Remote source network endpoint.</li><li>[CONFIRMED] <code>AuthenticationPackageName=NTLM</code> and <code>LmPackageName=NTLM V2</code>: Protocol and package negotiated.</li><li>[CONFIRMED] <code>TargetLogonId=0x5A3F21C</code>: Unique session identifier generated for this logon.</li></ul>"
+  },
+  {
+   "q": "What's unknown?",
+   "a": "<ul style=\"margin:6px 0;padding-left:18px\"><li>[UNKNOWN] <b>The human actor</b>: Who was physically behind the keyboard (valid credential presented != the person using j.okafor was the operator).</li><li>[UNKNOWN] <b>Source process</b>: Which program on WS-0147 initiated the connection (FS01 destination sensor records <code>ProcessName=-</code>).</li><li>[UNKNOWN] <b>Credential origin</b>: How the credential was acquired (legitimately entered, cached SSO, phished, or replayed via pass-the-hash).</li><li>[UNKNOWN] <b>Subsequent actions</b>: What files, shares, or commands were accessed inside the session (requires 5140, 5145, 4688, or Sysmon logs).</li><li>[UNVERIFIED] <b>Host authenticity</b>: Whether the source machine is genuinely WS-0147 (workstation name is untrusted client-supplied data under NTLM).</li></ul>"
+  },
+  {
+   "q": "What would you check next?",
+   "a": "<ol style=\"margin:6px 0;padding-left:18px\"><li><b>Correlate session ID on FS01</b>: Query Security logs for <code>TargetLogonId 0x5A3F21C</code> to find Event 5140/5145 (shares/files accessed), 4672 (admin rights), 4688 (processes spawned), and 4634 (logoff time).</li><li><b>Verify source host & identity</b>: Look up <code>10.20.4.37</code> in DHCP and CMDB asset inventory to confirm hostname, machine type, and primary assigned user.</li><li><b>Inspect source host telemetry</b>: Search 10.20.4.37 for Sysmon Event 3 (outbound network connection to port 445) and Event 1 (process creation tree) to identify the connecting process.</li><li><b>Inspect DC authentication logs</b>: Query Event 4776 on Domain Controllers to review NTLM credential validation results and check for preceding failed attempts (4625/4771).</li></ol>"
+  }
+ ],
+ "ENTITIES_JSON": {
+  "entities": [
+   {
+    "type": "user",
+    "value": "j.okafor",
+    "field": "TargetUserName",
+    "label": "CONFIRMED"
+   },
+   {
+    "type": "host",
+    "value": "FS01.corp.example.local",
+    "field": "Computer",
+    "label": "CONFIRMED"
+   },
+   {
+    "type": "host",
+    "value": "WS-0147",
+    "field": "WorkstationName",
+    "label": "UNVERIFIED"
+   },
+   {
+    "type": "IP",
+    "value": "10.20.4.37",
+    "field": "IpAddress",
+    "label": "CONFIRMED"
+   },
+   {
+    "type": "logon session",
+    "value": "0x5A3F21C",
+    "field": "TargetLogonId",
+    "label": "CONFIRMED"
+   },
+   {
+    "type": "process",
+    "value": "-",
+    "field": "ProcessName",
+    "label": "UNKNOWN"
+   }
+  ],
+  "relationships": [
+   {
+    "source": "j.okafor",
+    "target": "FS01.corp.example.local",
+    "rel": "logged on over network (LogonType 3)",
+    "fields": "TargetUserName, Computer, LogonType",
+    "label": "CONFIRMED"
+   },
+   {
+    "source": "10.20.4.37",
+    "target": "FS01.corp.example.local",
+    "rel": "connected from 10.20.4.37 source port 51544 (destination port/service: UNKNOWN, not in a 4624)",
+    "fields": "IpAddress, IpPort, Computer",
+    "label": "CONFIRMED"
+   },
+   {
+    "source": "j.okafor",
+    "target": "0x5A3F21C",
+    "rel": "assigned new logon session on destination",
+    "fields": "TargetUserName, TargetLogonId",
+    "label": "CONFIRMED"
+   },
+   {
+    "source": "WS-0147",
+    "target": "10.20.4.37",
+    "rel": "client-reported machine name for source IP",
+    "fields": "WorkstationName, IpAddress",
+    "label": "UNVERIFIED"
+   },
+   {
+    "source": "-",
+    "target": "10.20.4.37",
+    "rel": "initiating client process on source host",
+    "fields": "ProcessName",
+    "label": "UNKNOWN"
+   }
+  ]
+ },
+ "FIELDS_JSON": [
+  {
+   "k": "EventID",
+   "v": "4624",
+   "kind": "",
+   "meaning": "<b>An account was successfully logged on.</b> Written by the Security log of the computer that was accessed, where the logon session was created.",
+   "why": "It is a <i>destination-side</i> record: FS01 is telling you someone logged on <i>to it</i>. The failed version is 4625."
+  },
+  {
+   "k": "Computer",
+   "v": "FS01.corp.example.local",
+   "kind": "",
+   "meaning": "The host that wrote the event, i.e. the sensor.",
+   "why": "This is the <b>destination</b>. Beginners often read it as the source. The source is in IpAddress / WorkstationName."
+  },
+  {
+   "k": "SubjectUserSid",
+   "v": "S-1-0-0",
+   "kind": "",
+   "meaning": "The account that reported or requested the logon. <code>S-1-0-0</code> is the NULL SID: no local account asked for this logon.",
+   "why": "Normal for a network logon: the request came over the wire, not from a process on FS01. (The community Sigma pass-the-hash rule keys on NULL SID + type 3 + NtLmSsp + KeyLength 0.)"
+  },
+  {
+   "k": "TargetUserName",
+   "v": "j.okafor",
+   "kind": "clue",
+   "meaning": "The account the new logon session was created for (\"New Logon > Account Name\").",
+   "why": "This is the <b>identity</b>, not the person. It proves the credential for j.okafor was presented, not that the person using j.okafor was at a keyboard."
+  },
+  {
+   "k": "TargetDomainName",
+   "v": "CORP",
+   "kind": "",
+   "meaning": "Domain (or computer name for local accounts) of the target account.",
+   "why": "CORP = a domain account, so the DC was involved in validating it. If this showed the host name, it would be a local account."
+  },
+  {
+   "k": "TargetUserSid",
+   "v": "S-1-5-21-…-1107",
+   "tok": "TargetUserSid=S-1-5-21-3623811015-3361044348-30300820-1107",
+   "kind": "pivot",
+   "meaning": "The SID of the account logged on. SIDs are never reused.",
+   "why": "Pivot on the SID rather than the name: names can be renamed, SIDs can't. RID 1107 = an ordinary user (500 would be the built-in Administrator)."
+  },
+  {
+   "k": "TargetLogonId",
+   "v": "0x5A3F21C",
+   "kind": "pivot",
+   "meaning": "Hex ID of the new logon session on FS01.",
+   "why": "<b>The most useful pivot.</b> Every later event in this session on FS01 (4672 privileges, 5140 share access, 4688 process creation, 4634 logoff) carries this same ID."
+  },
+  {
+   "k": "LogonType",
+   "v": "3",
+   "kind": "clue",
+   "meaning": "<b>Network</b>: a user or computer logged on to this computer from the network (SMB share, RPC, WMI, PsExec-style tools…).",
+   "why": "Type 3 means no desktop session: no one 'sat at' FS01. Compare 2 = interactive, 10 = RDP."
+  },
+  {
+   "k": "LogonProcessName",
+   "v": "NtLmSsp",
+   "kind": "clue",
+   "meaning": "The trusted logon process that handled it: the NTLM security support provider.",
+   "why": "Together with the auth package, confirms NTLM was the protocol used."
+  },
+  {
+   "k": "AuthenticationPackageName",
+   "v": "NTLM",
+   "kind": "clue",
+   "meaning": "The authentication package used. Negotiate picks <b>Kerberos unless it can't be used</b>, then falls back to NTLM.",
+   "why": "In a healthy domain, NTLM on a domain account is a <b>clue to explain</b>: the share was reached by IP address (no matching SPN for Kerberos by default), an SPN is missing, the client isn't domain-joined, or a tool forced NTLM (pass-the-hash works over NTLM)."
+  },
+  {
+   "k": "LmPackageName",
+   "v": "NTLM V2",
+   "kind": "",
+   "meaning": "NTLM sub-version (only filled when the package is NTLM): NTLM V1, NTLM V2 or LM.",
+   "why": "V2 is the expected one. V1 or LM would be a weak-crypto finding by itself."
+  },
+  {
+   "k": "WorkstationName",
+   "v": "WS-0147",
+   "kind": "clue",
+   "meaning": "Machine name from which the logon attempt was performed.",
+   "why": "With NTLM this name is <b>supplied by the client</b> in the handshake. Attack tools can send any name (or none), so trust IpAddress plus DHCP/asset data over this field."
+  },
+  {
+   "k": "IpAddress",
+   "v": "10.20.4.37",
+   "kind": "pivot",
+   "meaning": "Source network address of the machine that logged on.",
+   "why": "Pivot to DHCP/asset inventory (whose laptop is this?), then to that host's own logs (Sysmon 3, 4648) to see which process made the connection."
+  },
+  {
+   "k": "IpPort",
+   "v": "51544",
+   "kind": "",
+   "meaning": "Source port used on the remote machine.",
+   "why": "An ephemeral client port. Mostly useful to join with firewall/Zeek records of the same connection (10.20.4.37:51544 → FS01:445)."
+  },
+  {
+   "k": "LogonGuid",
+   "v": "{00000000-…}",
+   "tok": "LogonGuid={00000000-0000-0000-0000-000000000000}",
+   "kind": "",
+   "meaning": "GUID that links this logon to Kerberos events such as 4769 on the DC. All zeroes = not captured.",
+   "why": "Zeroes are expected here: there is no Kerberos ticket to link to, because this was NTLM."
+  },
+  {
+   "k": "KeyLength",
+   "v": "128",
+   "kind": "clue",
+   "meaning": "Length of the NTLM session security key. 0 if Kerberos was used.",
+   "why": "Microsoft says to flag NTLM logons where KeyLength isn't 128. The Sigma pass-the-hash heuristic looks for 0. 128 is normal, but it does <b>not</b> rule out stolen credentials."
+  },
+  {
+   "k": "ProcessName",
+   "v": "-",
+   "kind": "",
+   "meaning": "Local process that attempted the logon. Empty for remote network logons.",
+   "why": "The 4624 can't tell you which program on WS-0147 started the connection. That's on the <i>source</i> host."
+  },
+  {
+   "k": "ElevatedToken",
+   "v": "%%1843",
+   "kind": "",
+   "meaning": "%%1843 = No; %%1842 = Yes (session has administrator privileges).",
+   "why": "No elevated token. If this were an admin you'd also expect a 4672 with the same logon ID."
+  }
+ ],
+ "WHO": "[CONFIRMED] <code>CORP\\j.okafor</code> (SID …-1107). An <b>account</b>, i.e. whoever held a working credential for it. [UNKNOWN] Not proof of the human.",
+ "WHAT_RAN": "[CONFIRMED] On FS01: the SMB server handed the login to <b>LSASS</b>, which created session <code>0x5A3F21C</code>. [UNKNOWN] On the source host: <code>ProcessName=-</code>.",
+ "BOUNDARY": "[CONFIRMED] The <b>network → host</b> boundary of FS01, recorded by FS01's own Security log at the moment LSASS built the session. A destination-side sensor.",
+ "PROVES": "<ul><li>[CONFIRMED] A valid credential for <b>CORP\\j.okafor</b> was accepted by FS01 (the claim of FS01's log).</li><li>[CONFIRMED] The connection came from <b>10.20.4.37</b>, port 51544, at <b>14:32:07 UTC</b>.</li><li>[CONFIRMED] It was a <b>network</b> logon (type 3), not someone at FS01's console.</li><li>[CONFIRMED] <b>NTLM v2</b> was used, not Kerberos.</li><li>[CONFIRMED] A session <code>0x5A3F21C</code> exists that you can follow.</li></ul>",
+ "NOT_PROVES": "<ul><li>[UNKNOWN] That <b>the person using j.okafor</b> did it. Proving identity is not the same as proving the person (or that they were <i>permitted</i> to).</li><li>[UNKNOWN] <b>How the credential was obtained</b>: typed, cached single sign-on, phished, or a stolen hash replayed.</li><li>[UNKNOWN] <b>Which program</b> on 10.20.4.37 made the connection.</li><li>[UNKNOWN] <b>What happened next</b>: files read, shares touched, processes started (needs 5140/5145, 4688 or Sysmon 1, 4672).</li><li>[UNVERIFIED] That the machine is really named WS-0147: NTLM lets the client choose that name.</li><li>[UNVERIFIED] That the password was guessed. A 4624 is a <i>success</i>, not a brute-force signal by itself.</li></ul>",
+ "BLIND_SPOT": "<p style=\"margin:6px 0 0\">[UNKNOWN] FS01 sits at the <b>destination</b>. It only sees what arrived at its door: the credential, the source IP, the protocol. It can't see <b>inside WS-0147</b> (who was logged on there, what process opened port 445, whether a hash was pulled from memory) or <b>inside the session</b> unless extra auditing is on.</p>",
+ "FILLS_GAP": "<ul style=\"margin:6px 0 0;padding-left:18px\"><li><b>Source host</b>: Sysmon Event 3 (network connection → which process hit 10.20.1.15:445), 4648 (explicit credentials used), EDR process tree.</li><li><b>DC01</b>: 4776 (the DC validated an NTLM credential for j.okafor, with the workstation name), plus 4625/4771 failures before it.</li><li><b>FS01 after logon</b>: 4672 (special privileges = admin), 5140/5145 (share/file accessed, needs Object Access auditing), 4688 or Sysmon 1 (process created), 4634 (logoff, gives session length).</li><li><b>Network</b>: Zeek <code>smb_mapping.log</code> / <code>ntlm.log</code> or firewall logs for the same 10.20.4.37:51544 → :445 flow.</li></ul>",
+ "MERMAID": "flowchart LR\n  subgraph SRC[\"WS-0147 · 10.20.4.37 (source)\"]\n    P[\"? process<br/>unknown to FS01\"]\n  end\n  subgraph DST[\"FS01 · 10.20.1.15 (sensor)\"]\n    SMB[\"SMB server :445\"] --> LSA[\"LSASS\"]\n    LSA --> LOG[(\"Security log<br/>4624 type 3 ✔\")]\n  end\n  P -->|\"SMB · NTLMv2 · j.okafor\"| SMB\n  LSA -->|\"NTLM pass-through\"| DC[\"DC01<br/>4776 validates\"]\n  classDef sensor stroke:#e6b84f,stroke-width:2px;\n  classDef blind stroke:#f43f5e,stroke-dasharray:5 4;\n  class LOG sensor\n  class P blind",
+ "MERMAID_NOTE": "Gold = the sensor that wrote this line. Red dashed = what it can't see. The DC holds a second, independent record (4776) of the same login.",
+ "DECISION_TREE_JSON": {
+  "q": "Check DHCP & asset inventory: Does 10.20.4.37 belong to j.okafor's assigned workstation?",
+  "yes": {
+   "q": "Check logon configuration: Is the target share mounted by IP address rather than FQDN, explaining NTLM fallback?",
+   "yes": {
+    "q": "Check FS01 file & share auditing (Events 5140/5145, 4672): Were accesses limited to normal departmental shares with no admin rights?",
+    "yes": {
+     "outcome": "Close as benign",
+     "detail": "Expected user accessing routine file share over IP-based path; recommend updating mapping to FQDN to enable Kerberos."
+    },
+    "no": {
+     "outcome": "Escalate",
+     "detail": "Sensitive share access (e.g. ADMIN$/C$) or elevated privileges used on FS01."
+    }
+   },
+   "no": {
+    "q": "Check source host endpoint telemetry (Sysmon 3 / 4648): Did a standard interactive process (e.g. Explorer) initiate the connection?",
+    "yes": {
+     "outcome": "Need more data",
+     "detail": "Likely benign, but this doesn't explain the NTLM fallback; investigate missing SPN or domain trust configuration."
+    },
+    "no": {
+     "outcome": "Escalate",
+     "detail": "Non-standard process, CLI utility, or script initiated outbound SMB connection."
+    }
+   }
+  },
+  "no": {
+   "q": "Check Domain Controller logs (Events 4776, 4625) and network flows: Are multiple destinations or failed logins observed for j.okafor?",
+   "yes": {
+    "outcome": "Escalate",
+    "detail": "Pattern worth investigating as possible lateral movement or spraying."
+   },
+   "no": {
+    "outcome": "Need more data",
+    "detail": "Unknown or kiosk device presenting valid domain credentials; confirm physical device and interview user."
+   }
+  }
+ },
+ "ATTACK_JSON": [
+  {
+   "id": "T1021.002",
+   "name": "Remote Services: SMB/Windows Admin Shares",
+   "fields": "LogonType (3), LogonProcessName (NtLmSsp), Computer (FS01.corp.example.local), IpAddress (10.20.4.37) (caveat: a 4624 type 3 doesn't prove SMB was used; this log has no destination port or share name)",
+   "label": "INFERRED",
+   "confirm": "Subsequent Event 5140/5145 (share/object access) under TargetLogonId 0x5A3F21C showing connection to administrative shares (ADMIN$, C$) or IPC$, or source-host Sysmon Event 3 connecting to TCP port 445.",
+   "rule_out": "Subsequent session activity restricted strictly to standard non-administrative file shares (e.g. routine mapped department share), or network telemetry showing an alternative RPC/WMI service binding instead of SMB."
+  },
+  {
+   "id": "T1550.002",
+   "name": "Use Alternate Authentication Material: Pass the Hash",
+   "fields": "LogonType (3), AuthenticationPackageName (NTLM), LmPackageName (NTLM V2), KeyLength (128) (NTLM alone is common; these fields barely narrow it)",
+   "label": "UNVERIFIED",
+   "confirm": "A 4624 logon type 9 with seclogo on the source host, or a process opening LSASS (Sysmon Event 10) just before the connection.",
+   "rule_out": "Evidence that the user legitimately authenticated interactively on 10.20.4.37 with a typed password or cached credential, or a verified legacy script configured to connect via NTLM by host IP."
+  },
+  {
+   "id": "T1078.002",
+   "name": "Valid Accounts: Domain Accounts",
+   "fields": "TargetUserName (j.okafor), TargetDomainName (CORP), TargetUserSid (S-1-5-21-3623811015-3361044348-30300820-1107)",
+   "label": "UNVERIFIED",
+   "confirm": "Evidence of unauthorized account use (e.g. login originating from an unassigned workstation or external IP while the employee is on leave, impossible travel, or simultaneous sessions from disparate hosts). Candidate only: presenting a valid credential does not prove malice.",
+   "rule_out": "Proof that j.okafor was physically present, working on their assigned machine, and performing standard routine business activity as verified by HR and device inventory."
+  }
+ ],
+ "DETECTION_JSON": {
+  "behaviour": "Anomalous NTLM Network Logon Fan-out from Single Host",
+  "description": "Flags a single source host performing multiple network logons (type 3) using NTLM authentication across distinct servers or user accounts within a 15-minute window. Note: the thresholds (3 hosts, 2 users, 15 minutes) are guesses, so tune them on real baseline data. Approved_Scanning_Subnets is an environment-specific list you'd have to supply yourself. Draft idea, untested.",
+  "events_fields": "EventID 4624 (LogonType=3, AuthenticationPackageName='NTLM', IpAddress, Computer, TargetUserName); requires external DC Event 4776 or target Event 5140 for share context.",
+  "query": "FROM Windows:Security:4624\nWHERE LogonType == 3\n  AND AuthenticationPackageName == \"NTLM\"\n  AND IpAddress NOT IN (Approved_Scanning_Subnets, Domain_Controllers)\nGROUP BY IpAddress, WINDOW(15m)\nHAVING COUNT_DISTINCT(Computer) >= 3\n    OR COUNT_DISTINCT(TargetUserName) >= 2\nSELECT IpAddress,\n       LIST_UNIQUE(Computer),\n       LIST_UNIQUE(TargetUserName),\n       MIN(TimeGenerated) AS FirstSeen,\n       MAX(TimeGenerated) AS LastSeen",
+  "false_positives": "Administrative vulnerability scanners, automated asset discovery engines, or backup software traversing file servers with service accounts over IP addresses.",
+  "missing_data": "Source process tree and executable path (requires Sysmon Event 3 or EDR on 10.20.4.37), network share names and files touched (requires Event 5140/5145 on FS01), and elevated token validation (Event 4672)."
+ },
+ "PIVOTS": "<ol class=\"pivots\"><li><b>Follow the session on FS01.</b> Pull every event carrying <code>0x5A3F21C</code>: 4672 (was it admin?), 5140/5145 (which shares/files), 4688 (did anything run?), 4634 (when did it end?).</li><li><b>Widen on the source.</b> Did 10.20.4.37 do NTLM type-3 logons to <i>other</i> servers in the same 10 minutes? One server = normal work. Many = possible lateral movement.</li><li><b>Go to the source host.</b> Look up 10.20.4.37 in DHCP/asset inventory, then that host's Sysmon 3 / EDR for the process that connected to 10.20.1.15:445, and the DC's 4776 for the same minute.</li></ol>",
+ "KQL": "// Microsoft Sentinel · SecurityEvent (example values)\n// 1) Everything in this logon session on FS01\nSecurityEvent\n| where TimeGenerated between (datetime(2026-10-21 14:30) .. datetime(2026-10-21 16:30))\n| where Computer == \"FS01.corp.example.local\"\n| where TargetLogonId =~ \"0x5a3f21c\" or SubjectLogonId =~ \"0x5a3f21c\"\n| project TimeGenerated, EventID, Activity, ShareName, NewProcessName, PrivilegeList\n| order by TimeGenerated asc\n\n// 2) Fan-out from the same source IP\nSecurityEvent\n| where TimeGenerated between (datetime(2026-10-21 14:20) .. datetime(2026-10-21 14:45))\n| where EventID == 4624 and LogonType == 3 and AuthenticationPackageName == \"NTLM\"\n| where IpAddress == \"10.20.4.37\"\n| summarize Hosts = dcount(Computer), HostList = make_set(Computer), Accounts = make_set(TargetUserName)",
+ "CONTEXT_JSON": {
+  "n": {
+   "title": "Reads as: ordinary file-share access",
+   "setup": "Same line. Here's what the surrounding evidence says:",
+   "facts": [
+    "[INFERRED] DHCP/asset inventory: 10.20.4.37 = WS-0147, assigned to j.okafor (Finance).",
+    "[INFERRED] Her login script maps <code>\\\\10.20.1.15\\Finance</code> <b>by IP</b>. That explains NTLM: there's no Kerberos SPN for an IP address by default.",
+    "[CONFIRMED] Within the same session: one 5140 for <code>\\\\*\\Finance</code>, no 4672 (not admin), 4634 logoff 3 hours later.",
+    "[INFERRED] 10.20.4.37 made no other NTLM type-3 logons that hour. The DC shows a single matching 4776 success."
+   ],
+   "verdict": "[INFERRED] Benign: expected user, expected host, expected share. Fix the IP-based mapping so Kerberos is used, then move on."
+  },
+  "s": {
+   "title": "Reads as: possible lateral movement (T1021.002 / T1550.002)",
+   "setup": "The exact same line, different surroundings:",
+   "facts": [
+    "[UNVERIFIED] Asset inventory: 10.20.4.37 belongs to a <b>reception kiosk</b>, not WS-0147. The client-supplied workstation name doesn't match.",
+    "[UNVERIFIED] j.okafor is on annual leave. Her last interactive logon was 9 days ago.",
+    "[UNVERIFIED] In the same 10 minutes, 10.20.4.37 made NTLM type-3 logons to <b>11 other servers</b> as j.okafor.",
+    "[INFERRED] On FS01, session 0x5A3F21C touches <code>\\\\*\\ADMIN$</code> (5140), then a 7045 service install appears. That's a PsExec-style pattern."
+   ],
+   "verdict": "[INFERRED] Suspicious: treat the credential as compromised. Isolate 10.20.4.37, reset j.okafor, and hunt for where her hash or password was taken."
+  }
+ },
+ "QUIZ_JSON": [
+  {
+   "q": "Does this line prove j.okafor's password was guessed?",
+   "a": "[CONFIRMED] <b>No.</b> 4624 is a <i>success</i>. It says a working credential was presented, not how it was obtained. To argue guessing you'd need a run of 4625 / 4771 / 4776 failures before it. A stolen hash (pass-the-hash) would also produce a successful NTLM logon with no failures at all."
+  },
+  {
+   "q": "Can you tell from this line which files she opened or what she ran on FS01?",
+   "a": "[CONFIRMED] <b>No.</b> The line only marks the start of a session. Pivot on <code>TargetLogonId 0x5A3F21C</code> to 5140/5145 (share/file access, if Object Access auditing is enabled), 4688 or Sysmon 1 (processes), and 4672 (admin privileges)."
+  },
+  {
+   "q": "Why is NTLM instead of Kerberos a clue, and what's the first <i>innocent</i> explanation to check?",
+   "a": "[INFERRED] In a domain, Negotiate prefers Kerberos, so NTLM means Kerberos couldn't be used. The most common innocent reason is that the share was reached by <b>IP address</b> (Kerberos needs a service principal name that matches a host name), or the SPN is missing. Only once that's ruled out should you lean towards forced NTLM / pass-the-hash."
+  }
+ ],
+ "SOURCES": "<ul style=\"margin:0;padding-left:18px\">\n<li><a href=\"https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4624\">Microsoft: 4624(S) An account was successfully logged on (field meanings, logon types, KeyLength guidance)</a></li>\n<li><a href=\"https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4672\">Microsoft: 4672(S) Special privileges assigned to new logon</a></li>\n<li><a href=\"https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-5140\">Microsoft: 5140(S, F) A network share object was accessed</a></li>\n<li><a href=\"https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4776\">Microsoft: 4776(S, F) The computer attempted to validate the credentials for an account</a></li>\n<li><a href=\"https://attack.mitre.org/techniques/T1021/002/\">MITRE ATT&amp;CK T1021.002: SMB/Windows Admin Shares</a> · <a href=\"https://attack.mitre.org/techniques/T1550/002/\">T1550.002: Pass the Hash</a> · <a href=\"https://attack.mitre.org/techniques/T1078/\">T1078: Valid Accounts</a></li>\n<li><a href=\"https://github.com/SigmaHQ/sigma/blob/master/rules/windows/builtin/security/account_management/win_security_pass_the_hash_2.yml\">SigmaHQ: Pass the Hash Activity 2 (NULL SID + type 3 + NtLmSsp + KeyLength 0)</a></li>\n</ul>"
+}

@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{TITLE}} · Evidence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+:root{--bg:#09090b;--card:#111114;--card2:#16161a;--line:#24242a;--text:#e8e8ec;--dim:#8b8b96;--gold:#e6b84f;--red:#f43f5e;--redbg:#f43f5e12;--blue:#38bdf8;--bluebg:#38bdf812;--green:#4ade80;--greenbg:#4ade8012;--r:18px}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);background-image:radial-gradient(900px 500px at 15% -10%,#e6b84f14,transparent),radial-gradient(800px 500px at 110% 10%,#38bdf80f,transparent);color:var(--text);font:15.5px/1.6 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:960px;margin:0 auto;padding:48px 22px 96px}
+.eyebrow{font:600 11px 'JetBrains Mono',monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);opacity:.85}
+h1{font-weight:800;font-size:2.6rem;letter-spacing:-.02em;margin:8px 0 6px;line-height:1.15}
+.lede{color:var(--dim);font-size:1.05rem;max-width:760px;margin:0}
+.card{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:var(--r);padding:24px 26px;margin:20px 0}
+h2{display:flex;align-items:center;gap:10px;font:600 12px 'JetBrains Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin:0 0 16px}
+h2::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold)}
+h3{margin:0 0 10px;font-size:1rem}
+.mermaid{display:flex;justify-content:center;padding:8px 0}
+.mermaid svg rect{rx:14px;ry:14px}
+.mermaid svg .note{rx:10px;ry:10px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:760px){.split,.three{grid-template-columns:1fr}}
+.side{border-radius:16px;padding:20px 22px;border:1px solid}
+.side ul{margin:0;padding-left:18px}.side li{margin:6px 0}
+.pro{background:var(--greenbg);border-color:#4ade8040}.pro h3{color:var(--green)}
+.con{background:var(--redbg);border-color:#f43f5e40}.con h3{color:var(--red)}
+.chip{display:inline-block;font:600 12px 'JetBrains Mono',monospace;padding:2px 8px;border-radius:999px;border:1px solid var(--line);background:#0006;margin:2px 4px 2px 0}
+code{font:13px 'JetBrains Mono',monospace;background:#000;border:1px solid var(--line);padding:1px 6px;border-radius:6px;color:#e8e8ec}
+button{font:500 14px Inter,sans-serif;color:var(--text);background:#1d1d22;border:1px solid var(--line);border-radius:999px;padding:8px 16px;cursor:pointer;transition:.15s}
+button:hover{border-color:var(--gold);color:var(--gold)}
+a{color:var(--gold);text-decoration:none;border-bottom:1px solid #e6b84f55}a:hover{border-color:var(--gold)}
+.dim{color:var(--dim)}
+/* evidence labels */
+.badge{display:inline-flex;align-items:center;font:700 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:6px;margin-right:6px;vertical-align:middle;white-space:nowrap}
+.badge-confirmed{background:#4ade801f;color:#4ade80;border:1px solid #4ade8055}
+.badge-inferred{background:#38bdf81f;color:#38bdf8;border:1px solid #38bdf855}
+.badge-unverified{background:#f59e0b1f;color:#fbbf24;border:1px solid #f59e0b55}
+.badge-unknown{background:#8b8b961f;color:#a1a1aa;border:1px solid #8b8b9655}
+/* header meta */
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 0}
+.meta .chip{color:#e6b84f;border-color:#e6b84f55}
+.raw{font:12.5px/1.75 'JetBrains Mono',monospace;background:#050507;border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:16px;white-space:pre-wrap;word-break:break-all;color:#a1a1aa}
+.raw mark{background:#e6b84f33;color:#fde68a;border-radius:4px;padding:0 2px}
+.tag{font:600 10px 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+/* anatomy */
+.fields{display:flex;flex-wrap:wrap;gap:8px}
+.fchip{font:500 12.5px 'JetBrains Mono',monospace;color:#d4d4d8;background:#0c0c0f;border:1px solid var(--line);border-radius:999px;padding:6px 12px}
+.fchip b{color:var(--gold);font-weight:600}
+.fchip.clue{border-color:#f43f5e66}.fchip.clue b{color:#fda4af}
+.fchip.pivot{border-color:#38bdf866}.fchip.pivot b{color:#7dd3fc}
+.fchip.on{background:#e6b84f1f;border-color:var(--gold)}
+.fpanel{margin-top:16px;border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:#0c0c0f;min-height:120px}
+.fpanel .fk{font:600 14px 'JetBrains Mono',monospace;color:var(--gold)}
+.fpanel .fv{font:13px 'JetBrains Mono',monospace;color:#e8e8ec;word-break:break-all}
+.fpanel dl{margin:8px 0 0;display:grid;grid-template-columns:120px 1fr;gap:6px 14px}
+.fpanel dt{font:600 11px 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);padding-top:3px}
+.fpanel dd{margin:0}
+.legend{margin-top:10px;font-size:13px;color:var(--dim)}
+.legend span{margin-right:14px}
+/* PIB card */
+.pib{border:1px solid var(--line);border-radius:16px;padding:16px 18px;background:#0c0c0f}
+.pib .tag{display:block;margin-bottom:6px;color:var(--gold)}
+.pib p{margin:0}
+/* blind spot */
+.blind{border-left:3px solid var(--red);padding:2px 0 2px 16px;margin:0 0 14px}
+.fill{border-left:3px solid var(--blue);padding:2px 0 2px 16px;margin:0}
+/* pivots */
+.pivots{margin:0;padding-left:20px}.pivots li{margin:8px 0}
+pre.kql{font:13px/1.65 'JetBrains Mono',monospace;background:#050507;border:1px solid var(--line);border-radius:14px;padding:16px 18px;overflow:auto;margin:10px 0 0;color:#e8e8ec;white-space:pre}
+.kqlbar{display:flex;justify-content:space-between;align-items:center;margin-top:16px}
+.kqlbar button{padding:6px 14px;font-size:13px}
+/* toggle */
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:4px;background:#050507;gap:4px;margin-bottom:16px}
+.seg button{border:none;background:transparent;padding:8px 18px}
+.seg button.on.n{background:#4ade801f;color:var(--green)}
+.seg button.on.s{background:#f43f5e1f;color:var(--red)}
+.ctx{border-radius:16px;padding:18px 20px;border:1px solid}
+.ctx.n{background:var(--greenbg);border-color:#4ade8040}.ctx.s{background:var(--redbg);border-color:#f43f5e40}
+.ctx ul{margin:8px 0 0;padding-left:18px}.ctx li{margin:5px 0}
+.ctx .verdict{margin-top:12px;font-weight:600}
+.ctx.n .verdict{color:var(--green)}.ctx.s .verdict{color:var(--red)}
+/* quiz */
+.q{border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:10px 0;background:#0c0c0f}
+.q .qq{font-weight:500;display:flex;justify-content:space-between;gap:14px;align-items:center}
+.q .qa{display:none;color:var(--dim);margin:10px 0 0;border-top:1px dashed var(--line);padding-top:10px}
+.q .qa p{margin:6px 0}.q .qa ul,.q .qa ol{margin:6px 0;padding-left:18px}.q .qa li{margin:4px 0}
+.q.open .qa{display:block}
+.q button{flex-shrink:0;padding:6px 14px;font-size:13px}
+/* entities */
+.table-wrap{overflow-x:auto}
+.entities-table{width:100%;border-collapse:collapse;margin:4px 0}
+.entities-table th{text-align:left;padding:8px 12px;font:600 11px/1.2 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--line)}
+.entities-table td{padding:9px 12px;border-bottom:1px solid #1a1a20;font-size:13.5px;color:var(--text);vertical-align:middle}
+.entities-table tr:hover td{background:#131317}
+.entity-type{display:inline-block;padding:2px 7px;border-radius:6px;background:#18181f;border:1px solid var(--line);font:600 11px 'JetBrains Mono',monospace;color:var(--gold);text-transform:uppercase;letter-spacing:.05em}
+.rel-list{margin:0;padding:0;list-style:none}
+.rel-list li{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:9px 14px;border:1px solid var(--line);border-radius:12px;background:#0c0c0f;margin-bottom:8px;font-size:13.5px}
+.rel-field{font:12px 'JetBrains Mono',monospace;color:var(--dim);margin-left:auto}
+@media(max-width:760px){.rel-field{margin-left:0;width:100%}}
+/* decision tree */
+.tree-node{border:1px solid var(--line);border-radius:14px;background:#0c0c0f;margin:8px 0;padding:2px}
+.tree-summary{padding:10px 14px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:10px;list-style:none;user-select:none}
+.tree-summary::-webkit-details-marker{display:none}
+.tree-summary:hover{background:#16161c;border-radius:10px}
+.tree-check-tag{font:700 10px/1 'JetBrains Mono',monospace;letter-spacing:.08em;padding:4px 7px;border-radius:6px;background:#e6b84f18;color:var(--gold);border:1px solid #e6b84f44;flex-shrink:0}
+.tree-q{font-size:14px;color:#e8e8ec;flex:1}
+.tree-branches{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 14px;border-top:1px dashed var(--line);background:#070709;border-radius:0 0 12px 12px}
+@media(max-width:760px){.tree-branches{grid-template-columns:1fr}}
+.tree-branch{display:flex;flex-direction:column;gap:8px}
+.branch-label{font:700 11px/1 'JetBrains Mono',monospace;letter-spacing:.08em;padding:3px 8px;border-radius:6px;display:inline-block;width:fit-content}
+.branch-label.yes{background:#4ade8018;color:var(--green);border:1px solid #4ade8044}
+.branch-label.no{background:#f43f5e18;color:var(--red);border:1px solid #f43f5e44}
+.branch-content{flex:1}
+.tree-outcome{border-radius:12px;padding:12px 14px;border:1px solid;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.outcome-escalate{background:var(--redbg);border-color:#f43f5e40}
+.outcome-escalate .outcome-pill{color:var(--red);font:700 11px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase}
+.outcome-benign{background:var(--greenbg);border-color:#4ade8040}
+.outcome-benign .outcome-pill{color:var(--green);font:700 11px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase}
+.outcome-data{background:var(--bluebg);border-color:#38bdf840}
+.outcome-data .outcome-pill{color:var(--blue);font:700 11px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase}
+.outcome-detail{color:var(--text);line-height:1.45}
+/* attack */
+.attack-grid{display:grid;grid-template-columns:1fr;gap:12px}
+.attack-item{border:1px solid var(--line);border-radius:14px;background:#0c0c0f;padding:14px 18px}
+.attack-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.attack-title{font-size:14.5px;font-weight:600;color:#e8e8ec}
+.attack-id{font:600 12px 'JetBrains Mono',monospace;color:var(--gold);margin-right:6px}
+.attack-fields{font:12px 'JetBrains Mono',monospace;color:var(--dim);margin-bottom:10px}
+.attack-criteria{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-size:13px}
+@media(max-width:760px){.attack-criteria{grid-template-columns:1fr}}
+.crit-box .tag{display:block;margin-bottom:4px}
+.crit-confirm .tag{color:var(--green)}
+.crit-ruleout .tag{color:var(--red)}
+/* detection */
+.draft-badge{display:inline-flex;align-items:center;gap:6px;font:600 11px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:14px}
+.det-block{border:1px solid var(--line);border-radius:14px;background:#0c0c0f;padding:18px 20px}
+.det-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px}
+.det-desc{color:var(--dim);font-size:13.5px;margin-bottom:14px;line-height:1.5}
+.det-meta{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0;font-size:13px}
+@media(max-width:760px){.det-meta{grid-template-columns:1fr}}
+.det-meta dt{font:600 11px 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+.det-meta dd{margin:0;color:#e8e8ec;line-height:1.5}
+.det-pseudo{font:12.5px/1.6 'JetBrains Mono',monospace;background:#050507;border:1px solid var(--line);border-radius:12px;padding:14px 16px;overflow-x:auto;color:#d4d4d8;margin:12px 0;white-space:pre}
+</style></head><body><main>
+<div class="eyebrow">Evidence · {{SOURCE}} · {{EVENT_ID}}</div>
+<h1>{{TITLE}}</h1>
+<p class="lede">{{TLDR}}</p>
+<div class="meta"><span class="chip">Sensor: {{SENSOR}}</span><span class="chip">Boundary: {{BOUNDARY_SHORT}}</span>{{EXAMPLE_BADGE}}</div>
+<div class="raw" id="raw"></div>
+
+<div class="card" id="challenge-card"><h2>Analyst challenge · 4 questions before you scroll</h2>
+<div class="legend" style="margin-top:0;margin-bottom:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+<span class="dim" style="font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:600">Labels:</span>
+<span><span class="badge badge-confirmed">CONFIRMED</span> directly in a field</span>
+<span><span class="badge badge-inferred">INFERRED</span> follows from fields</span>
+<span><span class="badge badge-unverified">UNVERIFIED</span> possible, needs checking</span>
+<span><span class="badge badge-unknown">UNKNOWN</span> not in log</span>
+</div>
+<div id="challenge"></div></div>
+
+<div class="card"><h2>Anatomy · click a field</h2>
+<div class="fields" id="fields"></div>
+<div class="fpanel" id="fpanel"></div>
+<div class="legend"><span><b style="color:#fda4af">●</b> clue field</span><span><b style="color:#7dd3fc">●</b> pivot key (join to other logs)</span><span><b style="color:var(--gold)">●</b> context</span></div>
+</div>
+
+<div class="card" id="entities-card"><h2>Entities &amp; Relationships · who &amp; what</h2>
+<div class="table-wrap"><table class="entities-table">
+<thead><tr><th>Type</th><th>Value in log</th><th>Field cited</th><th>Status</th></tr></thead>
+<tbody id="entities-tbody"></tbody>
+</table></div>
+<div class="tag" style="margin:16px 0 8px;letter-spacing:.14em">Relationships</div>
+<ul class="rel-list" id="relationships-list"></ul>
+</div>
+
+<div class="card"><h2>Process · Identity · Boundary</h2>
+<div class="three">
+<div class="pib"><span class="tag">Identity (who)</span><p>{{WHO}}</p></div>
+<div class="pib"><span class="tag">Process (what ran)</span><p>{{WHAT_RAN}}</p></div>
+<div class="pib"><span class="tag">Boundary (who recorded it)</span><p>{{BOUNDARY}}</p></div>
+</div></div>
+
+<div class="card"><h2>Proves vs does NOT prove</h2>
+<div class="split">
+<div class="side pro"><h3>✔ This line proves</h3>{{PROVES}}</div>
+<div class="side con"><h3>✘ It does NOT prove</h3>{{NOT_PROVES}}</div>
+</div></div>
+
+<div class="card"><h2>Blind spot</h2>
+<div class="blind"><span class="tag">What this sensor could not see</span>{{BLIND_SPOT}}</div>
+<div class="fill"><span class="tag">Which logs fill the gap</span>{{FILLS_GAP}}</div>
+</div>
+
+<div class="card"><h2>Sensor position</h2><div class="mermaid">{{MERMAID}}</div><p class="dim" style="margin:6px 0 0">{{MERMAID_NOTE}}</p></div>
+
+<div class="card" id="tree-card"><h2>Triage decision tree · follow the paths</h2>
+<p class="dim" style="margin:0 0 16px;font-size:13.5px">Step through the yes/no questions below by checking each named source. Branches collapse and expand to guide triage.</p>
+<div id="tree-root"></div>
+</div>
+
+<div class="card"><h2>Next pivot</h2>{{PIVOTS}}
+<div class="kqlbar"><span class="tag">KQL example</span><button onclick="navigator.clipboard.writeText(document.getElementById('kql').innerText);this.textContent='Copied ✓'">Copy KQL</button></div>
+<pre class="kql" id="kql">{{KQL}}</pre></div>
+
+<div class="card" id="attack-card"><h2>MITRE ATT&amp;CK · candidate techniques</h2>
+<p class="dim" style="margin:0 0 16px;font-size:13.5px">A single log line almost never confirms a technique. These are behavioral hypotheses to test with surrounding data.</p>
+<div class="attack-grid" id="attack-list"></div>
+</div>
+
+<div class="card" id="detection-card"><h2>Detection idea · draft rule</h2>
+<div class="draft-badge"><span class="badge badge-unverified">UNVERIFIED</span> Draft idea · untested</div>
+<div id="detection-body"></div>
+</div>
+
+<div class="card"><h2>Normal vs suspicious · same line</h2>
+<div class="seg"><button class="n on" id="bn" onclick="ctx('n')">Normal context</button><button class="s" id="bs" onclick="ctx('s')">Suspicious context</button></div>
+<div id="ctx"></div></div>
+
+<div class="card"><h2>Self-check</h2><div id="quiz"></div></div>
+<div class="card"><h2>Sources</h2>{{SOURCES}}</div>
+</main>
+<script>
+const RAW={{RAW_JSON}};
+const CHALLENGE={{CHALLENGE_JSON}};
+const ENTITIES={{ENTITIES_JSON}};
+const FIELDS={{FIELDS_JSON}};
+const DECISION_TREE={{DECISION_TREE_JSON}};
+const ATTACK={{ATTACK_JSON}};
+const DETECTION={{DETECTION_JSON}};
+const CTX={{CONTEXT_JSON}};
+const QUIZ={{QUIZ_JSON}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function showRaw(tok){const r=document.getElementById('raw');if(!tok){r.innerHTML=esc(RAW);return}
+ const i=RAW.indexOf(tok);r.innerHTML=i<0?esc(RAW):esc(RAW.slice(0,i))+'<mark>'+esc(tok)+'</mark>'+esc(RAW.slice(i+tok.length))}
+function pick(i){const f=FIELDS[i];document.querySelectorAll('.fchip').forEach((c,j)=>c.classList.toggle('on',j===i));
+ document.getElementById('fpanel').innerHTML=`<div class="fk">${esc(f.k)}</div><div class="fv">${esc(f.v)}</div><dl><dt>Meaning</dt><dd>${f.meaning}</dd><dt>Why it matters</dt><dd>${f.why}</dd></dl>`;
+ showRaw(f.tok||(f.k+'='+f.v))}
+document.getElementById('fields').innerHTML=FIELDS.map((f,i)=>`<button class="fchip ${f.kind||''}" onclick="pick(${i})"><b>${esc(f.k)}</b> ${esc(f.v.length>22?f.v.slice(0,20)+'…':f.v)}</button>`).join('');
+if(document.getElementById('challenge') && Array.isArray(CHALLENGE) && CHALLENGE.length){
+ document.getElementById('challenge').innerHTML=CHALLENGE.map((c,i)=>`<div class="q" id="c${i}"><div class="qq"><span>${c.q}</span><button onclick="const e=document.getElementById('c${i}');e.classList.toggle('open');this.textContent=e.classList.contains('open')?'Hide':'Reveal'">Reveal</button></div><div class="qa">${c.a}</div></div>`).join('');
+} else if(document.getElementById('challenge-card')) {
+ document.getElementById('challenge-card').style.display='none';
+}
+if(document.getElementById('entities-card')){
+ const ents=(ENTITIES&&ENTITIES.entities)||[];
+ const rels=(ENTITIES&&ENTITIES.relationships)||[];
+ if(ents.length===0&&rels.length===0){
+  document.getElementById('entities-card').style.display='none';
+ }else{
+  document.getElementById('entities-tbody').innerHTML=ents.map(e=>`<tr>
+   <td><span class="entity-type">${esc(e.type)}</span></td>
+   <td><code>${esc(e.value)}</code></td>
+   <td><code>${esc(e.field)}</code></td>
+   <td>${e.label.includes('<span')?e.label:`<span class="badge badge-${esc(e.label).toLowerCase()}">${esc(e.label)}</span>`}</td>
+  </tr>`).join('');
+  document.getElementById('relationships-list').innerHTML=rels.map(r=>`<li>
+   ${r.label.includes('<span')?r.label:`<span class="badge badge-${esc(r.label).toLowerCase()}">${esc(r.label)}</span>`}
+   <code>${esc(r.source)}</code> <span class="dim">→</span> <code>${esc(r.target)}</code>:
+   <span>${esc(r.rel)}</span>
+   <span class="rel-field">(proof: <code>${esc(r.fields)}</code>)</span>
+  </li>`).join('');
+ }
+}
+function renderTreeNode(node,depth=0){
+ if(!node)return'';
+ if(node.outcome){
+  const ot=String(node.outcome).toLowerCase();
+  let cls='outcome-data';
+  if(ot.includes('escalate'))cls='outcome-escalate';
+  else if(ot.includes('benign')||ot.includes('close'))cls='outcome-benign';
+  return `<div class="tree-outcome ${cls}">
+   <span class="outcome-pill">${esc(node.outcome)}</span>
+   <span class="outcome-detail">${esc(node.detail||'')}</span>
+  </div>`;
+ }
+ const openAttr=depth<2?'open':'';
+ return `<details class="tree-node" ${openAttr}>
+  <summary class="tree-summary">
+   <span class="tree-check-tag">CHECK</span>
+   <span class="tree-q">${esc(node.q)}</span>
+  </summary>
+  <div class="tree-branches">
+   <div class="tree-branch yes-branch">
+    <div class="branch-label yes">YES</div>
+    <div class="branch-content">${renderTreeNode(node.yes,depth+1)}</div>
+   </div>
+   <div class="tree-branch no-branch">
+    <div class="branch-label no">NO</div>
+    <div class="branch-content">${renderTreeNode(node.no,depth+1)}</div>
+   </div>
+  </div>
+ </details>`;
+}
+if(document.getElementById('tree-card')){
+ if(DECISION_TREE&&DECISION_TREE.q){
+  document.getElementById('tree-root').innerHTML=renderTreeNode(DECISION_TREE,0);
+ }else{
+  document.getElementById('tree-card').style.display='none';
+ }
+}
+if(document.getElementById('attack-card')){
+ const items=(Array.isArray(ATTACK)?ATTACK:(ATTACK&&ATTACK.candidates))||[];
+ if(items.length===0){
+  document.getElementById('attack-card').style.display='none';
+ }else{
+  document.getElementById('attack-list').innerHTML=items.map(a=>`
+   <div class="attack-item">
+    <div class="attack-head">
+     <div class="attack-title"><span class="attack-id">${esc(a.id)}</span> ${esc(a.name)}</div>
+     <div>${a.label.includes('<span')?a.label:`<span class="badge badge-${esc(a.label).toLowerCase()}">${esc(a.label)}</span>`}</div>
+    </div>
+    <div class="attack-fields"><span class="dim">Fields cited:</span> <code>${esc(a.fields)}</code></div>
+    <div class="attack-criteria">
+     <div class="crit-box crit-confirm">
+      <span class="tag">What would confirm it</span>
+      <div>${esc(a.confirm)}</div>
+     </div>
+     <div class="crit-box crit-ruleout">
+      <span class="tag">What would rule it out</span>
+      <div>${esc(a.rule_out)}</div>
+     </div>
+    </div>
+   </div>`).join('');
+ }
+}
+if(document.getElementById('detection-card')){
+ if(DETECTION&&DETECTION.behaviour){
+  document.getElementById('detection-body').innerHTML=`
+   <div class="det-block">
+    <div class="det-title">${esc(DETECTION.behaviour)}</div>
+    <div class="det-desc">${esc(DETECTION.description||'')}</div>
+    <div class="tag" style="margin-bottom:6px">Pseudo-query (SIEM-agnostic logic)</div>
+    <pre class="det-pseudo">${esc(DETECTION.query)}</pre>
+    <dl class="det-meta">
+     <div><dt>Events &amp; Fields Used</dt><dd>${esc(DETECTION.events_fields)}</dd></div>
+     <div><dt>Likely False Positives</dt><dd>${esc(DETECTION.false_positives)}</dd></div>
+    </dl>
+    <div style="font-size:13px;border-top:1px dashed var(--line);padding-top:10px;margin-top:10px">
+     <span class="tag" style="color:#f43f5e">Data required that this log lacks</span>
+     <div style="margin-top:4px;color:var(--dim)">${esc(DETECTION.missing_data)}</div>
+    </div>
+   </div>`;
+ }else{
+  document.getElementById('detection-card').style.display='none';
+ }
+}
+function ctx(m){document.getElementById('bn').classList.toggle('on',m==='n');document.getElementById('bs').classList.toggle('on',m==='s');
+ const c=CTX[m];document.getElementById('ctx').innerHTML=`<div class="ctx ${m}"><h3>${c.title}</h3><div class="dim">${c.setup}</div><ul>${c.facts.map(x=>`<li>${x}</li>`).join('')}</ul><div class="verdict">${c.verdict}</div></div>`}
+document.getElementById('quiz').innerHTML=QUIZ.map((q,i)=>`<div class="q" id="q${i}"><div class="qq"><span>${q.q}</span><button onclick="const e=document.getElementById('q${i}');e.classList.toggle('open');this.textContent=e.classList.contains('open')?'Hide':'Reveal'">Reveal</button></div><div class="qa">${q.a}</div></div>`).join('');
+showRaw();pick(0);ctx('n');
+mermaid.initialize({startOnLoad:true,theme:'base',fontFamily:'Inter, sans-serif',themeVariables:{
+ background:'transparent',primaryColor:'#16161a',primaryBorderColor:'#3a3a44',primaryTextColor:'#e8e8ec',lineColor:'#e6b84f',
+ clusterBkg:'#0c0c0f',clusterBorder:'#3a3a44',edgeLabelBackground:'#111114',
+ actorBkg:'#16161a',actorBorder:'#3a3a44',actorTextColor:'#e8e8ec',actorLineColor:'#3a3a44',
+ signalColor:'#e6b84f',signalTextColor:'#e8e8ec',noteBkgColor:'#e6b84f1f',noteBorderColor:'#e6b84f66',noteTextColor:'#e8e8ec',
+ fontSize:'15px'}});
+</script>
+</body></html>
