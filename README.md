@@ -2,7 +2,7 @@
 
 An analyst-in-the-loop log explainer that turns one log event into an evidence page, separating what the log proves from what it doesn't.
 
-screenshot coming
+![Evidence Explainer Preview](assets/screenshot.png)
 
 ## Why It Exists
 
