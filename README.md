@@ -25,7 +25,7 @@ Each generated standalone HTML report contains:
 
 - **Raw Log Line**: Displayed at the top with dynamic token highlighting upon selecting fields.
 - **Analyst Challenge**: Four questions (*What happened?*, *What evidence supports that?*, *What's unknown?*, *What would you check next?*) with answers hidden behind reveal buttons to test the analyst before scrolling.
-- **Field Anatomy**: Vendor-documented meaning and investigation significance for every key field.
+- **Field Anatomy**: Plain-English meaning and why it matters, with links to vendor docs to verify.
 - **Entities & Relationships**: Users, hosts, IP addresses, processes, and session IDs tied to source fields, with explicit link relationships.
 - **Process · Identity · Boundary**: Clear separation of authenticated account, executing process, and recording sensor boundary.
 - **Proves vs Does NOT Prove**: Strict boundary between confirmed facts and unverified assumptions.
@@ -60,6 +60,7 @@ A generated sample is available at `examples/windows-4624-type3.html`.
 - Detection ideas are untested drafts.
 - Sample data is synthetic.
 - The analyst makes every decision; the tool only displays the paths.
+- Explanations are AI-assisted; always check against the vendor docs.
 
 ## Roadmap
 

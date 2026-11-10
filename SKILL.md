@@ -21,8 +21,8 @@ Goal: fix Nigel's #1 gap, **reading a log line as evidence**. Every page teaches
    If it's ambiguous, pick the most likely one and say so in the TL;DR.
 2. **Pin the sensor and its position.** Which component wrote the line (LSASS on the destination host, the Sysmon driver on an endpoint, sshd on the server, Entra's token service, a perimeter firewall, Zeek on a SPAN port, CloudTrail at the AWS API)? Which **boundary** does it sit on (network → host, user → kernel, identity provider, cloud control plane, network segment)? This sets the blind spot.
 3. **Field meanings come from the vendor docs.** For each field, write its meaning from Microsoft Learn, Sysmon, Zeek, AWS, Entra or the man page. If you're not 100% sure, **WebFetch the vendor page** before writing it. Never invent a field or a value meaning. If something is still uncertain, say so on the page. Put the doc links in Sources.
-4. **Fill the page** from `template.html` in this folder. Write `/tmp/evidence-values.json` (outside the vault) with every placeholder (see `example.json` for the 4624 demo), then run:
-   `python3 .agents/skills/evidence/fill.py /tmp/evidence-values.json Evidence/YYYY-MM-DD-<source>-<eventid>-<slug>.html`
+4. **Fill the page** from `template.html` in the skill folder. Write `values.json` with every placeholder (see `example.json` for the 4624 demo), then run:
+   `python3 fill.py values.json output.html`
    `fill.py` fails if any placeholder is missing or left over, and refuses to overwrite.
    Sections (all required):
    - **Header**: eyebrow `SOURCE · EVENT_ID`, title, TL;DR in plain English (one or two sentences: "X's log says Y happened"), sensor + boundary chips, an "Example data" badge if the line is sample data (empty string if it's real), and the raw line (`RAW_JSON`, auto-highlights the selected field).
@@ -53,4 +53,4 @@ Goal: fix Nigel's #1 gap, **reading a log line as evidence**. Every page teaches
 - Real field names, event IDs and value codes only (e.g. `%%1842` = Yes, `%%1843` = No). Unsure → WebFetch the vendor doc → still unsure → say so on the page.
 - If Nigel pastes a real line, keep it as given, but tell him if it contains real usernames/IPs before he shares the page. Sample lines use private IPs (10.x, 192.168.x), `example.local` domains and made-up names, and get the "Example data" badge.
 - Same theme as /detect and /visualize (black-gold, Inter + JetBrains Mono, 18px cards, rounded Mermaid boxes, Mermaid 11 CDN, single file).
-- Never overwrite (add `-2`), never edit or delete other vault files.
+- Never overwrite (add `-2`), never edit other files.
